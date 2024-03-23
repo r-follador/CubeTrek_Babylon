@@ -54,7 +54,7 @@ var delayCreateScene = function() {
             })
         })
         jsonData = values[1]; //returned from getJSON
-        kdtree = new kdTree(jsonData.geometry.coordinates[0]);
+        kdtree = new KdTree(jsonData.geometry.coordinates[0]);
         prepareMap2d(jsonData);
         coordinateSystem.centerLat = jsonData.properties.bbox.centerLat;
         coordinateSystem.centerLon = jsonData.properties.bbox.centerLon;
