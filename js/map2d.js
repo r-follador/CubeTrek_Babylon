@@ -61,7 +61,7 @@ export class Map2D {
             return;
         }
         var index = this.jsonData.geometry.coordinates[0].indexOf(closest[0][0]);
-        eventBus.emit('moveMarkers', {lon: closest[0][0][0], lat: closest[0][0][1], index: index});
+        eventBus.emit('moveMarkers', {lon: closest[0][0][0], lat: closest[0][0][1], datasIndex: index});
     }
 
     hideMarker() {

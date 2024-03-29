@@ -1,6 +1,11 @@
+import eventBus from './EventBus.js';
+
+const miles_per_km = 0.621371;
+const feet_per_m = 3.28084;
+
 export class GraphCube {
     constructor(jsonData) {
-        this.metric = sharedObjects.metric;
+        this.jsonData = jsonData;
         this.graphXAxis = GraphAxis.Distance;
         this.graphYAxis = GraphAxis.Elevation;
 
@@ -16,7 +21,7 @@ export class GraphCube {
         let verticalTimeSumDown = 0;
         this.datas = [];
 
-        for (var i=0; i<jsonData.geometry.coordinates[0].length; i++) {
+        for (let i=0; i<jsonData.geometry.coordinates[0].length; i++) {
             let time = parseDate(jsonData.geometry.coordinates[0][i][3]);
             let elevation = jsonData.geometry.coordinates[0][i][2];
             let distance = jsonData.geometry.coordinates[0][i][4];
@@ -49,36 +54,31 @@ export class GraphCube {
         this.horizontal_average = ((previousDistance)/(movingTime/3600));
         this.vertical_down_average = (verticalDistSumDown)/(verticalTimeSumDown/3600000);
         this.vertical_up_average = (verticalDistSumUp)/(verticalTimeSumUp/3600000);
-        document.getElementById("value_horizontal_average").innerText=(this.horizontal_average*(this.metric?1:miles_per_km)).toFixed(1)+(this.metric?" km/h":" mph");
-        document.getElementById("value_vertical_down_average").innerText=(this.vertical_down_average*(this.metric?1:feet_per_m)).toFixed(1)+(this.metric?" m/h":" ft/h");
-        document.getElementById("value_vertical_up_average").innerText=(this.vertical_up_average*(this.metric?1:feet_per_m)).toFixed(1)+(this.metric?" m/h":" ft/h");
+        let movingTimeMinutes = movingTime/60000;
+
+        document.getElementById("value_horizontal_average").innerText=(this.horizontal_average*(sharedObjects.metric?1:miles_per_km)).toFixed(1)+(sharedObjects.metric?" km/h":" mph");
+        document.getElementById("value_vertical_down_average").innerText=(this.vertical_down_average*(sharedObjects.metric?1:feet_per_m)).toFixed(1)+(sharedObjects.metric?" m/h":" ft/h");
+        document.getElementById("value_vertical_up_average").innerText=(this.vertical_up_average*(sharedObjects.metric?1:feet_per_m)).toFixed(1)+(sharedObjects.metric?" m/h":" ft/h");
+        document.getElementById("movingtime").innerText = Math.floor(movingTimeMinutes/60)+":"+Math.floor(movingTimeMinutes%60).toString().padStart(2,"0");
+
 
         this.maxAltitude = d3.max(this.datas, function(d) {return d.altitude});
         this.minAltitude = d3.min(this.datas, function(d) {return d.altitude});
 
-        this.graph = new drawGraph(graphYAxis, graphXAxis);
-
-        let movingTimeMinutes = movingTime/60000;
-        document.getElementById("movingtime").innerText = Math.floor(movingTimeMinutes/60)+":"+Math.floor(movingTimeMinutes%60).toString().padStart(2,"0");
+        this.drawGraph();
     }
-
-    horizontal_average;
-    vertical_down_average;
-    vertical_up_average;
-    maxAltitude = 5000;
-    minAltitude = 0;
 
     changeGraphX(type) {
         this.graphXAxis = type;
-        this.graph = new drawGraph(graphYAxis, graphXAxis);
+        this.drawGraph();
     }
 
     changeGraphY(type) {
         this.graphYAxis = type;
-        this.graph = new drawGraph(graphYAxis, graphXAxis);
+        this.drawGraph();
     }
 
-    drawGraph(yaxis, xaxis) {
+    drawGraph() {
         this.margingraph = {top: 10, right: 5, bottom: 25, left: 40};
 
         this.width = document.getElementById('graph').clientWidth-this.margingraph.left-this.margingraph.right;
@@ -100,36 +100,36 @@ export class GraphCube {
 
         this.regressionGenerator = d3.regressionLoess().bandwidth(0.03);
 
-        switch (yaxis) {
+        switch (this.graphYAxis) {
             case GraphAxis.Elevation:
                 document.getElementById("dropdowngraphyaxis").innerText = "Elevation";
-                this.yScale = d3.scaleLinear().domain(d3.extent(this.datas, function(d) { return (d.altitude*(metric?1:feet_per_m)); }));
-                this.functionpath.y((d) => { return this.yScale(d.altitude*(metric?1:feet_per_m)) });
-                this.regressionGenerator.y(d => d.altitude*(metric?1:feet_per_m));
+                this.yScale = d3.scaleLinear().domain(d3.extent(this.datas, function(d) { return (d.altitude*(sharedObjects.metric?1:feet_per_m)); }));
+                this.functionpath.y((d) => { return this.yScale(d.altitude*(sharedObjects.metric?1:feet_per_m)) });
+                this.regressionGenerator.y(d => d.altitude*(sharedObjects.metric?1:feet_per_m));
                 break;
             case GraphAxis.Distance:
                 document.getElementById("dropdowngraphyaxis").innerText = "Distance";
-                this.yScale = d3.scaleLinear().domain(d3.extent(this.datas, function(d) { return (d.distance*(metric?1/1000:miles_per_km/1000)); }));
-                this.functionpath.y((d) => {return this.yScale(d.distance*(metric?1/1000:miles_per_km/1000)) });
-                this.regressionGenerator.y(d => d.distance*(metric?1/1000:miles_per_km/1000));
+                this.yScale = d3.scaleLinear().domain(d3.extent(this.datas, function(d) { return (d.distance*(sharedObjects.metric?1/1000:miles_per_km/1000)); }));
+                this.functionpath.y((d) => {return this.yScale(d.distance*(sharedObjects.metric?1/1000:miles_per_km/1000)) });
+                this.regressionGenerator.y(d => d.distance*(sharedObjects.metric?1/1000:miles_per_km/1000));
                 break;
             case GraphAxis.VerticalSpeed:
                 document.getElementById("dropdowngraphyaxis").innerText = "Vertical Speed";
-                this.yScale = d3.scaleLinear().domain(d3.extent(this.datas, function(d) { return (d.vertical_speed*(metric?1:feet_per_m)); }));
-                this.functionpath.y((d) => {return this.yScale(d.vertical_speed*(metric?1:feet_per_m)) });
-                this.regressionGenerator.y(d => d.vertical_speed*(metric?1:feet_per_m));
+                this.yScale = d3.scaleLinear().domain(d3.extent(this.datas, function(d) { return (d.vertical_speed*(sharedObjects.metric?1:feet_per_m)); }));
+                this.functionpath.y((d) => {return this.yScale(d.vertical_speed*(sharedObjects.metric?1:feet_per_m)) });
+                this.regressionGenerator.y(d => d.vertical_speed*(sharedObjects.metric?1:feet_per_m));
                 break;
             case GraphAxis.HorizontalSpeed:
                 document.getElementById("dropdowngraphyaxis").innerText = "Horizontal Speed";
-                this.yScale = d3.scaleLinear().domain(d3.extent(this.datas, function(d) { return (d.horizontal_speed*(metric?1:miles_per_km)); }));
-                this.functionpath.y((d) => { return this.yScale(d.horizontal_speed*(metric?1:miles_per_km)) });
-                this.regressionGenerator.y(d => d.horizontal_speed*(metric?1:miles_per_km));
+                this.yScale = d3.scaleLinear().domain(d3.extent(this.datas, function(d) { return (d.horizontal_speed*(sharedObjects.metric?1:miles_per_km)); }));
+                this.functionpath.y((d) => { return this.yScale(d.horizontal_speed*(sharedObjects.metric?1:miles_per_km)) });
+                this.regressionGenerator.y(d => d.horizontal_speed*(sharedObjects.metric?1:miles_per_km));
                 break;
             default:
                 break;
         }
 
-        switch (xaxis) {
+        switch (this.graphXAxis) {
             case GraphAxis.ElapsedTime:
                 document.getElementById("dropdowngraphxaxis").innerText = "Elapsed time";
                 this.xScale = d3.scaleTime().domain(d3.extent(this.datas, function(d) { return d.time; }));
@@ -138,9 +138,9 @@ export class GraphCube {
                 break;
             case GraphAxis.Distance:
                 document.getElementById("dropdowngraphxaxis").innerText = "Distance";
-                this.xScale = d3.scaleLinear().domain(d3.extent(this.datas, function(d) { return (d.distance*(metric?1/1000:miles_per_km/1000)); }));
-                this.functionpath.x((d) => { return this.xScale(d.distance*(metric?1/1000:miles_per_km/1000)) });
-                this.regressionGenerator.x(d => d.distance*(metric?1/1000:miles_per_km/1000));
+                this.xScale = d3.scaleLinear().domain(d3.extent(this.datas, function(d) { return (d.distance*(sharedObjects.metric?1/1000:miles_per_km/1000)); }));
+                this.functionpath.x((d) => { return this.xScale(d.distance*(sharedObjects.metric?1/1000:miles_per_km/1000)) });
+                this.regressionGenerator.x(d => d.distance*(sharedObjects.metric?1/1000:miles_per_km/1000));
                 break;
             case GraphAxis.MovingTime:
                 document.getElementById("dropdowngraphxaxis").innerText = "Moving Time";
@@ -158,7 +158,7 @@ export class GraphCube {
         this.yScale.range([this.height,0]);
         this.xScale.range([0, this.width]);
 
-        if (xaxis === GraphAxis.MovingTime) {
+        if (this.graphXAxis === GraphAxis.MovingTime) {
             this.xAxisLabel.tickFormat(d3.utcFormat("%H:%M"));
         }
 
@@ -179,17 +179,17 @@ export class GraphCube {
             .attr("class", "datapath")
             .attr("d", this.functionpath)
 
-        if (yaxis === GraphAxis.VerticalSpeed) {
+        if (this.graphYAxis === GraphAxis.VerticalSpeed) {
             this.areaUp = d3.area()
                 .y0(this.yScale(0))
-                .y1((d) => { if (d.vertical_speed>0) {return this.yScale(d.vertical_speed*(metric?1:feet_per_m))}else{return this.yScale(0);}});
+                .y1((d) => { if (d.vertical_speed>0) {return this.yScale(d.vertical_speed*(sharedObjects.metric?1:feet_per_m))}else{return this.yScale(0);}});
 
             this.areaDown = d3.area()
                 .y0(this.yScale(0))
-                .y1((d) => { if (d.vertical_speed<0) {return this.yScale(d.vertical_speed*(metric?1:feet_per_m))}else{return this.yScale(0);}});
+                .y1((d) => { if (d.vertical_speed<0) {return this.yScale(d.vertical_speed*(sharedObjects.metric?1:feet_per_m))}else{return this.yScale(0);}});
 
 
-            switch (xaxis) {
+            switch (this.graphXAxis) {
                 case GraphAxis.MovingTime:
                     this.areaUp.x((d) => { return this.xScale(d.moving_time); })
                     this.areaDown.x((d) => { return this.xScale(d.moving_time); })
@@ -199,8 +199,8 @@ export class GraphCube {
                     this.areaDown.x((d) => { return this.xScale(d.time); })
                     break;
                 case GraphAxis.Distance:
-                    this.areaUp.x((d) => { return this.xScale(d.distance*(metric?1/1000:miles_per_km/1000)); })
-                    this.areaDown.x((d) => { return this.xScale(d.distance*(metric?1/1000:miles_per_km/1000)); })
+                    this.areaUp.x((d) => { return this.xScale(d.distance*(sharedObjects.metric?1/1000:miles_per_km/1000)); })
+                    this.areaDown.x((d) => { return this.xScale(d.distance*(sharedObjects.metric?1/1000:miles_per_km/1000)); })
                     break;
             }
 
@@ -217,7 +217,7 @@ export class GraphCube {
                 .attr("d", this.areaDown)
         }
 
-        if (yaxis === GraphAxis.HorizontalSpeed || yaxis === GraphAxis.VerticalSpeed) {
+        if (this.graphYAxis === GraphAxis.HorizontalSpeed || this.graphYAxis === GraphAxis.VerticalSpeed) {
             this.regressionpath = d3.line()
                 .x(d => this.xScale(d[0]))
                 .y(d => this.yScale(d[1]));
@@ -237,7 +237,7 @@ export class GraphCube {
 
         // This allows to find the closest X index of the mouse:
         this.bisect;
-        switch (xaxis) {
+        switch (this.graphXAxis) {
             case GraphAxis.MovingTime:
                 this.bisect = d3.bisector(function(d) { return d.moving_time; }).left;
                 break;
@@ -245,7 +245,7 @@ export class GraphCube {
                 this.bisect = d3.bisector(function(d) { return d.time; }).left;
                 break;
             case GraphAxis.Distance:
-                this.bisect = d3.bisector(function(d) { return (d.distance*(metric?1/1000:miles_per_km/1000)); }).left;
+                this.bisect = d3.bisector(function(d) { return (d.distance*(sharedObjects.metric?1/1000:miles_per_km/1000)); }).left;
                 break;
         }
         // Create the circle that travels along the curve of chart
@@ -271,106 +271,93 @@ export class GraphCube {
             .attr("text-anchor", "left")
             .attr("alignment-baseline", "middle")
 
-        // What happens when the mouse move -> show the annotations at the right positions.
 
-        var that = this;
-
-        this.showGraphMarker = function(){
-            that.focus.style("opacity", 1)
-            that.xfocusText.style("opacity",1)
-            that.yfocusText.style("opacity",1)
-        }
-
-        this.mouseover = function(){
-            that.showGraphMarker();
-        }
-
-        this.mousemove = function() {
-            // recover coordinate we need
-            var x0 = that.xScale.invert(d3.pointer(event, this)[0]);
-            var i = that.bisect(this.datas, x0, 1);
-            var selectedData = this.datas[i]
-            if (selectedData=== undefined)
-                return;
-
-            that.moveGraphMarker(selectedData);
-            moveMapMarker(jsonData.geometry.coordinates[0][i][1], jsonData.geometry.coordinates[0][i][0]);
-        }
-
-        this.moveGraphMarker = function(selectedData) {
-            this.xtext;
-            this.ytext
-            this.xdata;
-            this.ydata;
-
-            switch (xaxis) {
-                case GraphAxis.MovingTime:
-                    this.xdata = selectedData.moving_time;
-                    this.xtext = d3.utcFormat("%H:%M")(that.xdata) + " h";
-                    break;
-                case GraphAxis.ElapsedTime:
-                    this.xdata = selectedData.time;
-                    this.xtext = d3.timeFormat("%H:%M")(that.xdata);
-                    break;
-                case GraphAxis.Distance:
-                    this.xdata = (selectedData.distance*(metric?1/1000:miles_per_km/1000));
-                    this.xtext = (that.xdata).toFixed(2) + (metric?" km":" mi");
-                    break;
-            }
-
-            switch (yaxis) {
-                case GraphAxis.Distance:
-                    this.ydata = (selectedData.distance*(metric?1/1000:miles_per_km/1000));
-                    this.ytext = (that.ydata).toFixed(2) + (metric?" km":" mi");
-                    break;
-                case GraphAxis.Elevation:
-                    this.ydata = (selectedData.altitude*(metric?1:feet_per_m));
-                    this.ytext = that.ydata.toFixed(0) + (metric?" m":" ft");
-                    break;
-                case GraphAxis.VerticalSpeed:
-                    this.ydata = (selectedData.vertical_speed*(metric?1:feet_per_m));
-                    this.ytext = that.ydata.toFixed(1) + (metric?" m/h":" ft/h");
-                    break;
-                case GraphAxis.HorizontalSpeed:
-                    this.ydata = (selectedData.horizontal_speed*(metric?1:miles_per_km));
-                    this.ytext = that.ydata.toFixed(1) + (metric?" km/h":" mph");
-                    break;
-            }
-
-            that.focus
-                .attr("cx", that.xScale(this.xdata))
-                .attr("cy", that.yScale(this.ydata))
-            that.xfocusText
-                .html(this.xtext)
-                .attr("x", that.xScale(this.xdata)+15)
-                .attr("y", that.yScale(this.ydata))
-            that.yfocusText
-                .html(this.ytext)
-                .attr("x", that.xScale(this.xdata)+15)
-                .attr("y", that.yScale(this.ydata)+15)
-        }
-
-        this.hideGraphMarker = function() {
-            that.focus.style("opacity", 0)
-            that.xfocusText.style("opacity", 0)
-            that.yfocusText.style("opacity", 0);
-        }
-
-        this.mouseout = function() {
-            that.hideGraphMarker();
-            hideMapMarker();
-        }
 
         // Create a rect on top of the svg area: this rectangle recovers mouse position
-        this.svg
+        this.mouseSVG = this.svg
             .append('rect')
             .style("fill", "none")
             .style("pointer-events", "all")
             .attr('width', this.width)
             .attr('height', this.height)
-            .on('mouseover', this.mouseover)
             .on('mousemove', this.mousemove)
             .on('mouseout', this.mouseout);
+    }
+
+    mousemove = (event) => {
+        const [x] = d3.pointer(event, event.target);
+        const x0 = this.xScale.invert(x);
+        const i = this.bisect(this.datas, x0, 1);
+        const selectedData = this.datas[i];
+        if (!selectedData) return;
+
+        const [lon, lat] = this.jsonData.geometry.coordinates[0][i];
+        eventBus.emit('moveMarkers', { lon, lat, datasIndex: i });
+    }
+
+    mouseout = () => {
+        eventBus.emit('hideMarkers', {});
+    }
+
+    moveMarker = (datasIndex) => {
+        let selectedData = this.datas[datasIndex];
+        let xtext, ytext, xdata, ydata;
+
+        switch (this.graphXAxis) {
+            case GraphAxis.MovingTime:
+                xdata = selectedData.moving_time;
+                xtext = d3.utcFormat("%H:%M")(xdata) + " h";
+                break;
+            case GraphAxis.ElapsedTime:
+                xdata = selectedData.time;
+                xtext = d3.timeFormat("%H:%M")(xdata);
+                break;
+            case GraphAxis.Distance:
+                xdata = (selectedData.distance*(sharedObjects.metric?1/1000:miles_per_km/1000));
+                xtext = (xdata).toFixed(2) + (sharedObjects.metric?" km":" mi");
+                break;
+        }
+
+        switch (this.graphYAxis) {
+            case GraphAxis.Distance:
+                ydata = (selectedData.distance*(sharedObjects.metric?1/1000:miles_per_km/1000));
+                ytext = (ydata).toFixed(2) + (sharedObjects.metric?" km":" mi");
+                break;
+            case GraphAxis.Elevation:
+                ydata = (selectedData.altitude*(sharedObjects.metric?1:feet_per_m));
+                ytext = ydata.toFixed(0) + (sharedObjects.metric?" m":" ft");
+                break;
+            case GraphAxis.VerticalSpeed:
+                ydata = (selectedData.vertical_speed*(sharedObjects.metric?1:feet_per_m));
+                ytext = ydata.toFixed(1) + (sharedObjects.metric?" m/h":" ft/h");
+                break;
+            case GraphAxis.HorizontalSpeed:
+                ydata = (selectedData.horizontal_speed*(sharedObjects.metric?1:miles_per_km));
+                ytext = ydata.toFixed(1) + (sharedObjects.metric?" km/h":" mph");
+                break;
+        }
+
+        this.focus
+            .attr("cx", this.xScale(xdata))
+            .attr("cy", this.yScale(ydata))
+        this.xfocusText
+            .html(this.xtext)
+            .attr("x", this.xScale(xdata)+15)
+            .attr("y", this.yScale(ydata))
+        this.yfocusText
+            .html(this.ytext)
+            .attr("x", this.xScale(xdata)+15)
+            .attr("y", this.yScale(ydata)+15)
+
+        this.focus.style("opacity", 1)
+        this.xfocusText.style("opacity",1)
+        this.yfocusText.style("opacity",1)
+    }
+
+    hideMarker = () =>  {
+        this.focus.style("opacity", 0)
+        this.xfocusText.style("opacity", 0)
+        this.yfocusText.style("opacity", 0);
     }
 }
 
