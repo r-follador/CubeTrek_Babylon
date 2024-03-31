@@ -61,6 +61,13 @@ export class GraphCube {
         document.getElementById("value_vertical_up_average").innerText=(this.vertical_up_average*(sharedObjects.metric?1:feet_per_m)).toFixed(1)+(sharedObjects.metric?" m/h":" ft/h");
         document.getElementById("movingtime").innerText = Math.floor(movingTimeMinutes/60)+":"+Math.floor(movingTimeMinutes%60).toString().padStart(2,"0");
 
+        document.getElementById("graphYDistance").addEventListener('click', () =>  {this.changeGraphY(GraphAxis.Distance)});
+        document.getElementById("graphYElevation").addEventListener('click', () =>  {this.changeGraphY(GraphAxis.Elevation)});
+        document.getElementById("graphYHorizontalspeed").addEventListener('click', () =>  {this.changeGraphY(GraphAxis.HorizontalSpeed)});
+        document.getElementById("graphYVerticalspeed").addEventListener('click', () =>  {this.changeGraphY(GraphAxis.VerticalSpeed)});
+        document.getElementById("graphXElapsedtime").addEventListener('click', () =>  {this.changeGraphX(GraphAxis.ElapsedTime)});
+        document.getElementById("graphXMovingtime").addEventListener('click', () =>  {this.changeGraphX(GraphAxis.MovingTime)});
+        document.getElementById("graphXDistance").addEventListener('click', () =>  {this.changeGraphX(GraphAxis.Distance)});
 
         this.maxAltitude = d3.max(this.datas, function(d) {return d.altitude});
         this.minAltitude = d3.min(this.datas, function(d) {return d.altitude});
@@ -69,6 +76,7 @@ export class GraphCube {
     }
 
     changeGraphX(type) {
+        console.log("change to "+type);
         this.graphXAxis = type;
         this.drawGraph();
     }
