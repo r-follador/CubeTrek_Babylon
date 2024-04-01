@@ -43,7 +43,7 @@ export class Map2D {
 
         var el = document.createElement('div');
         el.className = 'marker2d';
-        this.marker= new maplibregl.Marker(el).setLngLat([0,0]).addTo(this.map);
+        this.marker= new maplibregl.Marker({element: el}).setLngLat([0,0]).addTo(this.map);
         this.kdtree = new KdTree(jsonData.geometry.coordinates[0]);
     }
 
