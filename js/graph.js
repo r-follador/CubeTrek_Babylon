@@ -69,8 +69,8 @@ export class GraphCube {
         document.getElementById("graphXMovingtime").addEventListener('click', () =>  {this.changeGraphX(GraphAxis.MovingTime)});
         document.getElementById("graphXDistance").addEventListener('click', () =>  {this.changeGraphX(GraphAxis.Distance)});
 
-        this.maxAltitude = d3.max(this.datas, function(d) {return d.altitude});
-        this.minAltitude = d3.min(this.datas, function(d) {return d.altitude});
+        sharedObjects.maxAltitude = d3.max(this.datas, function(d) {return d.altitude});
+        sharedObjects.minAltitude = d3.min(this.datas, function(d) {return d.altitude});
 
         this.drawGraph();
     }
