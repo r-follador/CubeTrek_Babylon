@@ -1,3 +1,4 @@
+import {KdTree} from "./kd-tree.js";
 import eventBus from './EventBus.js';
 
 const zscaling = 1.5;
@@ -12,10 +13,6 @@ export class Map3D {
         this.engine.setHardwareScalingLevel(0.7);
 
         this.coordinateSystem = [];
-        this.maxAltitude = 5000;
-        this.minAltitude = 0;
-
-        //TODO: define maxAltitude, minAltitude
 
         //Get relevant measurements for calculations from the GEOJson
         this.coordinateSystem.centerLat = geojson.properties.bbox.centerLat;
@@ -26,58 +23,80 @@ export class Map3D {
         this.width_x = (geojson.properties.bbox.boundingBoxE-geojson.properties.bbox.boundingBoxW)*geojson.properties.bbox.metersPerDegreeLon;
         this.zoomfactor = geojson.properties.tileBBoxes[0].tile_zoom;
 
-        this.scene = this.delayCreateScene();
-
-        this.engine.runRenderLoop(() => {
-            if (this.scene.activeCamera) {
-                this.scene.render();
-            }
-        });
         this.meshes = [];
+
+        this.kdtree = new KdTree(geojson.geometry.coordinates[0]);
+
+        this.scene = this.delayCreateScene().then(scene => {
+            this.scene = scene;
+            this.engine.runRenderLoop(() => {
+                if (this.scene.activeCamera) {
+                    this.scene.render();
+                }
+            });
+        })
     }
 
-    delayCreateScene() {
-        console.log("delayCreateScene");
+    async delayCreateScene() {
         const scene = new BABYLON.Scene(this.engine);
-        this.loadMeshAndTexture(scene).then(() => {
+        await this.loadMeshAndTexture(scene);
 
-            //Set the camera
-            var camera = new BABYLON.ArcRotateCamera("camera", Math.PI/4, Math.PI/4, 5000, new BABYLON.Vector3(0,0,1500), scene);
-            camera.upVector = new BABYLON.Vector3(0, 0, 1);
-            camera.setTarget(this.globalBoundingInfo.boundingBox.center);
-            camera.radius = this.globalBoundingInfo.diagonalLength * 1.5; //
-            camera.maxZ = 100000;
-            camera.upperBetaLimit = Math.PI/2;
-            camera.upperRadiusLimit = Math.min(100000, 10000*Math.pow(2,14-this.zoomfactor));
-            camera.lowerRadiusLimit = 100;
-            camera.wheelPrecision = 0.1; //Mouse wheel speed
-            camera.zoomToMouseLocation = true;
-            camera.panningSensibility = 2/Math.pow(2,14-this.zoomfactor);
-            camera.multiTouchPanAndZoom = true;
-            camera.useNaturalPinchZoom = true;
-            camera.attachControl(this.canvas, true, true);
-            camera.useAutoRotationBehavior = true;
-            camera.autoRotationBehavior.idleRotationWaitTime = 60 * 1000;
+        //Set the camera
+        var camera = new BABYLON.ArcRotateCamera("camera", Math.PI/4, Math.PI/4, 5000, new BABYLON.Vector3(0,0,1500), scene);
+        camera.upVector = new BABYLON.Vector3(0, 0, 1);
+        camera.setTarget(this.globalBoundingInfo.boundingBox.center);
+        camera.radius = this.globalBoundingInfo.diagonalLength * 1.5; //
+        camera.maxZ = 100000;
+        camera.upperBetaLimit = Math.PI/2;
+        camera.upperRadiusLimit = Math.min(100000, 10000*Math.pow(2,14-this.zoomfactor));
+        camera.lowerRadiusLimit = 100;
+        camera.wheelPrecision = 0.1; //Mouse wheel speed
+        camera.zoomToMouseLocation = true;
+        camera.panningSensibility = 2/Math.pow(2,14-this.zoomfactor);
+        camera.multiTouchPanAndZoom = true;
+        camera.useNaturalPinchZoom = true;
+        camera.attachControl(this.canvas, true, true);
+        camera.useAutoRotationBehavior = true;
+        camera.autoRotationBehavior.idleRotationWaitTime = 60 * 1000;
 
-            //Background
-            var layer = new BABYLON.Layer('','../assets/bkgrd.png', scene, true);
-            scene.clearColor = new BABYLON.Color3.FromHexString("#2e3c4d");
+        //Background
+        var backgroundLayer = new BABYLON.Layer('','../assets/bkgrd.png', scene, true);
+        scene.clearColor = new BABYLON.Color3.FromHexString("#2e3c4d");
 
-            //Lighting
-            this.helperLight = new BABYLON.HemisphericLight("DirectionalLightAbove", new BABYLON.Vector3(0,0, -1), scene);
-            this.helperLight.intensity=0.6;
-            var dirLight = new BABYLON.DirectionalLight("DirectionalLightSide", new BABYLON.Vector3(1, 1, 0), scene);
-            dirLight.intensity = 2;
-            scene.ambientColor = new BABYLON.Color3(1, 1, 1);
+        //Lighting
+        this.helperLight = new BABYLON.HemisphericLight("DirectionalLightAbove", new BABYLON.Vector3(0,0, -1), scene);
+        this.helperLight.intensity=0.6;
+        var dirLight = new BABYLON.DirectionalLight("DirectionalLightSide", new BABYLON.Vector3(1, 1, 0), scene);
+        dirLight.intensity = 2;
+        scene.ambientColor = new BABYLON.Color3(1, 1, 1);
 
-            camera.onViewMatrixChangedObservable.add(function(c) {
-                c.target.z = Math.min(Math.max(c.target.z, (sharedObjects.minAltitude-200)*zscaling), (sharedObjects.maxAltitude+200)*zscaling);
-                dirLight.direction = new BABYLON.Vector3(-1 * c.position.y, c.position.x, 0);
-            })
-        })
+        //when camera is changed (rotation/zoom/pan...)
+        camera.onViewMatrixChangedObservable.add(function(c) {
+            //Clamp camera.target.z within a certain boundary
+            //sharedObjects.minAltitude / maxAltitude is defined in graph.js
+            //TODO: this could use some smarter way to prevent the camera from going too far off
+            c.target.z = Math.min(Math.max(c.target.z, (sharedObjects.minAltitude - 200) * zscaling), (sharedObjects.maxAltitude + 200) * zscaling);
+            //change light as to give the impression that the mesh rotates (instead of the camera)
+            dirLight.direction = new BABYLON.Vector3(-1 * c.position.y, c.position.x, 0);
+        });
 
-        console.log("next step;")
+        await this.loadPeaks(this.geojson, scene);
 
+        scene.onPointerObservable.add((pointerInfo) => {
+            if (pointerInfo.type === BABYLON.PointerEventTypes.POINTERMOVE) {
+                var hit = scene.pick(scene.pointerX, scene.pointerY)
+                if (hit.hit) {
+                    var lat = (hit.pickedPoint._y/this.coordinateSystem.metersPerDegreeLat)+this.coordinateSystem.centerLat;
+                    var lon = this.coordinateSystem.centerLon-(hit.pickedPoint._x/this.coordinateSystem.metersPerDegreeLon);
+                    this.findClosestTrackpoint(lat,lon);
+                } else {
+                    this.findClosestTrackpoint(null);
+                }
+            }
+        });
+
+
+        //ParticleSystem is used as the position marker
         var particleSystem = new BABYLON.ParticleSystem("particles", 2000, scene);
         particleSystem.particleTexture = new BABYLON.Texture("../assets/flare.png", scene);
         particleSystem.emitter = new BABYLON.Vector3(0, 0, 0);
@@ -115,8 +134,6 @@ export class Map3D {
                 document.getElementById("progressbar").setAttribute("style", "width: " + loadedPercent + "%");
             };
             const result = await BABYLON.SceneLoader.ImportMeshAsync(null, rootPath, fileName, scene, onProgress);
-
-            console.log("Mesh import completed", result);
             document.getElementById("progressdiv").style.display = "none";
 
             //Loop through all meshes, Z-scale them, compute the normals (they are not properly set in the GLTF),
@@ -141,15 +158,19 @@ export class Map3D {
             //for each mesh, add a DynamicTexture with emissive property (for the path drawing)
             const textureSize = 512;
             let textureContexts = [];
+            const strokeStyle = "#ff8001";
+            const lineWidth = 3;
+
+            //Create an emissive, dynamic texture for each mesh
             for (let i =0; i < this.meshes.length; i++ ) {
-                var myDynamicTexture = new BABYLON.DynamicTexture("bla"+i, textureSize, scene);
+                var myDynamicTexture = new BABYLON.DynamicTexture("dtx"+i, textureSize, scene);
                 var textureContext = myDynamicTexture.getContext();
                 textureContexts.push(textureContext);
                 this.meshes[i].material.emissiveTexture = myDynamicTexture; //pBR texture
                 this.meshes[i].material.emissiveColor = new BABYLON.Color3(1, 1, 1);
                 //textureContext.strokeStyle = "#2a84de";
-                textureContext.strokeStyle = "#ff8001";
-                textureContext.lineWidth = 3;
+                textureContext.strokeStyle = strokeStyle;
+                textureContext.lineWidth = lineWidth;
                 textureContext.beginPath();
             }
 
@@ -159,6 +180,8 @@ export class Map3D {
             let px_perDegree_lon = 0;
             for (let i=0; i < this.geojson.geometry.coordinates.length; i++) {
                 let track = this.geojson.geometry.coordinates[i];
+                //track is an array of latitudes/longitudes of the gps track
+                //track[j][0] is longitude, track[j][1] is latitude
                 for (let j = 1; j < track.length; j++) {
 
                     if (tileIndex===-1 || !(this.geojson.properties.tileBBoxes[tileIndex].n_Bound > track[j][1] && this.geojson.properties.tileBBoxes[tileIndex].s_Bound < track[j][1] && this.geojson.properties.tileBBoxes[tileIndex].w_Bound < track[j][0] && this.geojson.properties.tileBBoxes[tileIndex].e_Bound > track[j][0])) {
@@ -188,7 +211,7 @@ export class Map3D {
                 }
             }
 
-            //Update all the new textures
+            //Update all the textures
             for (let i =0; i < this.meshes.length; i++ ) {
                 textureContexts[i].stroke();
                 this.meshes[i].material.emissiveTexture.update();
@@ -200,5 +223,109 @@ export class Map3D {
             document.getElementById("progressdiv").style.display = "none";
             console.error(error);
         }
+    }
+
+    //loadPeaks gets a list of peaks within the area (defined by [n/w/e/s]_bound)
+    //peaks are displayed as a signpost on top of the mesh
+    async loadPeaks(geojson, scene) {
+        let n_bound = geojson.properties.tileBBoxes[0].n_Bound;
+        let w_bound = geojson.properties.tileBBoxes[0].w_Bound;
+        let e_bound = geojson.properties.tileBBoxes[geojson.properties.tileBBoxes.length-1].e_Bound;
+        let s_bound = geojson.properties.tileBBoxes[geojson.properties.tileBBoxes.length-1].s_Bound;
+        const url = sharedObjects.root+"peaks/nbound="+n_bound+"&sbound="+s_bound+"&wbound="+w_bound+"&ebound="+e_bound;
+        const response = await fetch(url);
+        const peaklistjson = await response.json();
+        const font_size = 48;
+        const font = font_size + "px Helvetica";
+        const planeHeight = 100;
+        const DTHeight = 1.5 * font_size;
+        const ratio = planeHeight/DTHeight;
+        let temp = new BABYLON.DynamicTexture("DynamicTexture", 64, scene);
+        let tmpctx = temp.getContext();
+        tmpctx.font = font;
+        const f = new BABYLON.Vector4(0,0, 1, 1);
+        const b = new BABYLON.Vector4(1,0, 0, 1);
+
+        //mat2 is the plain material for the post of the signpost
+        let mat2 = new BABYLON.StandardMaterial("mat", scene);
+        mat2.ambientColor = new BABYLON.Color3(1, 1, 1);
+        mat2.alpha = 0.7;
+        for (let i=0; i < peaklistjson.peaklist.length && i < 100; i++) {
+
+            //Create mat, a Babylon.StandardMaterial with peak name
+            let text = peaklistjson.peaklist[i].name;
+            let DTWidth = tmpctx.measureText(text).width + 8;
+            let planeWidth = DTWidth * ratio;
+            let dynamicTexture = new BABYLON.DynamicTexture("DynamicTexture", {width:DTWidth, height:DTHeight}, scene, false);
+            let mat = new BABYLON.StandardMaterial("mat", scene);
+            mat.ambientTexture = dynamicTexture;
+            mat.ambientColor = new BABYLON.Color3(1, 1, 1);
+            mat.alpha = 0.7;
+            dynamicTexture.drawText(text, null, null, font, "#000000", "#ffffff", true);
+
+            let pos = this.getPosition(peaklistjson.peaklist[i].lat, peaklistjson.peaklist[i].lon, scene);
+
+            //plane is the sign of the signpost
+            let plane = BABYLON.MeshBuilder.CreatePlane("plane", {width:planeWidth, height:planeHeight, frontUVs: f, backUVs: b, sideOrientation: BABYLON.Mesh.DOUBLESIDE}, scene);
+            plane.material = mat;
+            plane.position.x = pos.x;
+            plane.position.y = pos.y;
+            plane.position.z = (pos.z*zscaling)+(planeHeight)+70;
+            plane.rotation.x = Math.PI/2;
+            plane.isPickable = false;
+
+            //plane2 is the post of the signpost
+            let plane2 = BABYLON.MeshBuilder.CreatePlane("plane2", {width:20, height:140, sideOrientation: BABYLON.Mesh.DOUBLESIDE}, scene);
+            plane2.position.x = pos.x;
+            plane2.position.y = pos.y;
+            plane2.position.z = (pos.z*zscaling)+70;
+            plane2.rotation.x = Math.PI/2;
+            plane2.isPickable = false;
+            plane2.material = mat2;
+        }
+    }
+
+    //shoots a BABYLON.Ray from the top down to query the intersection (pickWithRay)
+    //the idea is to get the height of the mesh at the given lat/lon to place the marker and sign posts
+    getPosition(lat, lon, scene) {
+        let x = (this.coordinateSystem.centerLon-lon)*this.coordinateSystem.metersPerDegreeLon;
+        let y = (lat-this.coordinateSystem.centerLat)*this.coordinateSystem.metersPerDegreeLat;
+        let ray = new BABYLON.Ray(new BABYLON.Vector3(x,y,20000), new BABYLON.Vector3(0,0,-1), 20100);
+        let hit = scene.pickWithRay(ray);
+        if (hit.hit) {
+            return hit.pickedPoint;
+        } else
+            return false;
+    }
+
+    findClosestTrackpoint(lat, lon) {
+        console.log("find line")
+        if (lat == null) {
+            console.log("lat is null");
+            eventBus.emit('hideMarkers', {});
+            return;
+        }
+
+        let closest = this.kdtree.nearest([lon, lat], 1, 0.00001);
+        if (closest.length<1) {
+            eventBus.emit('hideMarkers', {});
+            return;
+        }
+        var index = this.geojson.geometry.coordinates[0].indexOf(closest[0][0]);
+        eventBus.emit('moveMarkers', {lon: closest[0][0][0], lat: closest[0][0][1], datasIndex: index});
+    }
+
+    hideMarker() {
+        this.scene.particleSystems[0].stop();
+    }
+
+    moveMarker(lat, lon) {
+        let hit = this.getPosition(lat,lon, this.scene);
+        if (hit) {
+            this.scene.particleSystems[0].emitter = hit;
+            this.scene.particleSystems[0].start();
+            return true;
+        }
+        return false;
     }
 }

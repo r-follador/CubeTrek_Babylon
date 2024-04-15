@@ -38,7 +38,7 @@ export class Map2D {
         });
 
         this.map.on('mousemove', (e) => {
-            this.findLine(e.lngLat.lat, e.lngLat.lng);
+            this.findClosestTrackpoint(e.lngLat.lat, e.lngLat.lng);
         });
 
         var el = document.createElement('div');
@@ -47,7 +47,7 @@ export class Map2D {
         this.kdtree = new KdTree(jsonData.geometry.coordinates[0]);
     }
 
-    findLine(lat, lon) {
+    findClosestTrackpoint(lat, lon) {
         console.log("find line")
         if (lat == null) {
             console.log("lat is null");

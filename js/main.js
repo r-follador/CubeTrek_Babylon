@@ -26,12 +26,14 @@ function hideMarkers(data) {
     console.log('Hide markers:', data);
     map2d.hideMarker();
     graph.hideMarker();
+    map3d.hideMarker();
 }
 
 function moveMarkers(data) {
     console.log('Move markers:', data);
     map2d.moveMarker(data.lat, data.lon);
     graph.moveMarker(data.datasIndex);
+    map3d.moveMarker(data.lat, data.lon);
 }
 
 // Subscribe to the sync events
