@@ -9,13 +9,13 @@
     <script src=" https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.min.js "></script>
     <link href=" https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css " rel="stylesheet">
     <link href=" ../css/dashboard.css" rel="stylesheet">
-    <script src=" https://cdn.jsdelivr.net/npm/maplibre-gl@3.1.0/dist/maplibre-gl.min.js "></script>
-    <link href=" https://cdn.jsdelivr.net/npm/maplibre-gl@3.1.0/dist/maplibre-gl.min.css " rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/maplibre-gl@4.1.2/dist/maplibre-gl.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/maplibre-gl@4.1.2/dist/maplibre-gl.min.css" rel="stylesheet">
     <script src=" https://cdn.jsdelivr.net/npm/d3-regression@1.3.10/dist/d3-regression.min.js "></script>
     <script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
 
-    <script src=" https://cdn.jsdelivr.net/npm/babylonjs@6.7.0/babylon.min.js "></script>
-    <script src=" https://cdn.jsdelivr.net/npm/babylonjs-loaders@6.7.0/babylonjs.loaders.min.js "></script>
+    <script src="https://cdn.babylonjs.com/babylon.js"></script>
+    <script src="https://cdn.babylonjs.com/loaders/babylonjs.loaders.min.js"></script>
 <style>
     .marker2d {
         display: block;
@@ -39,7 +39,7 @@
     </ul>
 </header>
 
-<div class="progress" id="progressdiv" style="display: none;">
+<div class="progress" id="progressdiv">
     <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" id="progressbar" style="width: 100%"></div>
 </div>
 <div class="alert alert-danger" style="display: none;" id="errormessage" role="alert">
@@ -51,43 +51,39 @@
         <div class="col-xl-8 p-0 position-relative" style="height: 50vh; min-height: 500px">
             <canvas class="p-0 m-0" style="width: 100%; height: 100%; touch-action: none; z-index: 0; outline: none;" id="renderCanvas" touch-action="none" width="1777" height="714" data-engine="Babylon.js v6.7.0" tabindex="1"></canvas>
             <div class="btn-group-vertical position-absolute top-0 start-0 p-3" role="group" id="mapstyle">
-                <input type="radio" class="btn-check" name="btnradio" id="btnradio1" autocomplete="off" checked="checked" onchange="mapstyle('summer')">
+                <input type="radio" class="btn-check" name="btnradio" id="btnradio1" autocomplete="off" checked="checked">
                 <label class="btn btn-outline-danger" for="btnradio1">Map</label>
-                <input type="radio" class="btn-check" name="btnradio" id="btnradio3" autocomplete="off" onchange="mapstyle('satellite')">
+                <input type="radio" class="btn-check" name="btnradio" id="btnradio3" autocomplete="off">
                 <label class="btn btn-outline-danger" for="btnradio3">Satellite</label>
             </div>
         </div>
 
         <div class="col-xl-4 d-flex flex-xl-column p-0">
             <div class="d-flex flex-fill w-100 flex-column p-0 m-0" style="height: 25vh; min-height: 250px">
-                <div class="flex-grow-1 p-0 m-0" id="graph" style="width:100%"><svg width="622" height="215"><g transform="translate(40,10)"><g transform="translate(0,180)" class="myXaxis" fill="none" font-size="10" font-family="sans-serif" text-anchor="middle"><path class="domain" stroke="currentColor" d="M0,6V0H577V6"></path><g class="tick" opacity="1" transform="translate(0,0)"><line stroke="currentColor" y2="6"></line><text fill="currentColor" y="9" dy="0.71em">0</text></g><g class="tick" opacity="1" transform="translate(66.93735498839906,0)"><line stroke="currentColor" y2="6"></line><text fill="currentColor" y="9" dy="0.71em">2</text></g><g class="tick" opacity="1" transform="translate(133.87470997679813,0)"><line stroke="currentColor" y2="6"></line><text fill="currentColor" y="9" dy="0.71em">4</text></g><g class="tick" opacity="1" transform="translate(200.81206496519718,0)"><line stroke="currentColor" y2="6"></line><text fill="currentColor" y="9" dy="0.71em">6</text></g><g class="tick" opacity="1" transform="translate(267.74941995359626,0)"><line stroke="currentColor" y2="6"></line><text fill="currentColor" y="9" dy="0.71em">8</text></g><g class="tick" opacity="1" transform="translate(334.6867749419953,0)"><line stroke="currentColor" y2="6"></line><text fill="currentColor" y="9" dy="0.71em">10</text></g><g class="tick" opacity="1" transform="translate(401.62412993039436,0)"><line stroke="currentColor" y2="6"></line><text fill="currentColor" y="9" dy="0.71em">12</text></g><g class="tick" opacity="1" transform="translate(468.56148491879344,0)"><line stroke="currentColor" y2="6"></line><text fill="currentColor" y="9" dy="0.71em">14</text></g><g class="tick" opacity="1" transform="translate(535.4988399071925,0)"><line stroke="currentColor" y2="6"></line><text fill="currentColor" y="9" dy="0.71em">16</text></g></g><g class="myYaxis" fill="none" font-size="10" font-family="sans-serif" text-anchor="end"><path class="domain" stroke="currentColor" d="M-6,180H0V0H-6"></path><g class="tick" opacity="1" transform="translate(0,178.06829268292682)"><line stroke="currentColor" x2="-6"></line><text fill="currentColor" x="-9" dy="0.32em">800</text></g><g class="tick" opacity="1" transform="translate(0,160.50731707317073)"><line stroke="currentColor" x2="-6"></line><text fill="currentColor" x="-9" dy="0.32em">900</text></g><g class="tick" opacity="1" transform="translate(0,142.94634146341465)"><line stroke="currentColor" x2="-6"></line><text fill="currentColor" x="-9" dy="0.32em">1,000</text></g><g class="tick" opacity="1" transform="translate(0,125.38536585365853)"><line stroke="currentColor" x2="-6"></line><text fill="currentColor" x="-9" dy="0.32em">1,100</text></g><g class="tick" opacity="1" transform="translate(0,107.82439024390243)"><line stroke="currentColor" x2="-6"></line><text fill="currentColor" x="-9" dy="0.32em">1,200</text></g><g class="tick" opacity="1" transform="translate(0,90.26341463414634)"><line stroke="currentColor" x2="-6"></line><text fill="currentColor" x="-9" dy="0.32em">1,300</text></g><g class="tick" opacity="1" transform="translate(0,72.70243902439024)"><line stroke="currentColor" x2="-6"></line><text fill="currentColor" x="-9" dy="0.32em">1,400</text></g><g class="tick" opacity="1" transform="translate(0,55.14146341463415)"><line stroke="currentColor" x2="-6"></line><text fill="currentColor" x="-9" dy="0.32em">1,500</text></g><g class="tick" opacity="1" transform="translate(0,37.58048780487804)"><line stroke="currentColor" x2="-6"></line><text fill="currentColor" x="-9" dy="0.32em">1,600</text></g><g class="tick" opacity="1" transform="translate(0,20.019512195121948)"><line stroke="currentColor" x2="-6"></line><text fill="currentColor" x="-9" dy="0.32em">1,700</text></g><g class="tick" opacity="1" transform="translate(0,2.458536585365856)"><line stroke="currentColor" x2="-6"></line><text fill="currentColor" x="-9" dy="0.32em">1,800</text></g></g><path fill="none" stroke="#ff8001" stroke-width="2" class="datapath" d="M0,177.717L1.004,177.717L2.008,177.893L2.343,177.893L3.246,178.244L4.083,178.42L5.221,178.771L6.727,178.946L8.836,179.473L9.706,179.473L10.208,179.473L10.844,179.649L11.446,179.649L11.614,179.649L12.049,179.649L12.383,179.649L12.651,179.649L12.919,179.824L13.387,180L13.756,179.824L14.157,179.824L14.258,179.824L14.726,179.824L15.228,180L15.362,180L16.232,179.824L16.467,179.824L16.801,179.649L17.002,179.649L17.772,178.946L18.374,178.244L19.378,177.015L19.847,176.488L20.684,175.961L21.453,175.259L22.257,174.907L22.893,174.38L23.194,174.205L23.964,173.678L24.7,172.8L25.336,172.273L25.47,172.273L25.804,171.922L25.938,171.746L26.206,171.395L26.507,171.044L26.842,170.517L27.277,169.99L27.846,169.639L29.084,168.937L29.687,168.585L29.954,168.234L30.523,167.707L30.892,167.356L31.427,166.829L31.862,165.951L31.996,165.776L32.498,165.249L33.167,164.722L33.536,164.371L33.937,164.02L35.544,162.615L36.314,161.912L36.715,161.561L37.083,161.21L37.385,160.859L38.288,159.805L39.861,157.698L40.196,156.995L40.631,156.468L40.865,156.293L41.267,156.117L41.669,155.239L43.442,153.483L43.81,152.956L44.011,152.78L44.647,152.078L45.116,151.727L45.517,150.849L45.618,150.673L46.019,150.322L46.488,149.971L47.157,149.444L47.793,148.741L48.429,148.215L49.065,147.512L50.17,146.107L50.772,145.405L51.408,144L51.642,143.649L51.81,143.473L52.345,142.595L52.579,142.42L52.947,141.893L53.416,141.366L53.885,141.015L54.52,140.488L54.889,140.137L55.826,139.61L56.094,139.083L56.328,138.907L56.662,138.907L57.399,138.907L58.202,138.38L59.039,137.854L59.708,137.327L59.809,137.327L60.344,137.151L60.679,137.151L62.352,137.151L63.825,136.273L64.427,135.922L66,134.341L66.536,133.815L67.105,133.288L67.506,133.112L68.979,133.112L69.046,133.112L69.481,132.937L70.585,132.585L71.288,132.059L71.556,131.883L72.192,131.18L72.66,130.654L73.129,130.127L73.899,129.424L74.3,129.249L75.104,128.371L75.673,127.844L76.409,127.141L76.911,126.79L77.246,126.439L77.748,126.088L77.915,125.737L78.518,125.385L78.819,125.21L79.388,124.683L79.555,124.507L79.823,124.332L80.325,123.805L80.593,123.454L80.86,123.102L81.061,122.751L81.262,122.576L81.764,122.049L82.534,121.698L83.571,120.644L84.04,120.644L85.446,120.468L87.253,120.82L88.257,121.171L88.826,121.171L89.529,120.82L89.997,120.82L91.068,120.644L91.303,120.644L91.403,120.468L92.039,120.293L92.307,120.293L93.344,120.468L93.679,120.468L95.352,120.117L97.026,119.941L97.662,119.766L98.632,119.415L99.101,119.415L99.469,119.59L100.105,119.59L100.373,119.766L100.741,119.766L101.377,119.941L101.644,119.766L101.979,119.941L103.351,119.766L103.719,119.766L104.288,120.117L105.025,120.293L105.259,120.293L106.196,120.293L106.598,120.293L106.966,120.468L107.669,120.468L108.405,120.468L108.706,120.468L108.941,120.644L109.443,120.644L110.212,120.644L111.25,120.82L111.919,120.468L113.191,119.941L113.593,120.117L113.827,120.293L114.128,120.293L114.329,120.293L115.3,120.293L115.701,119.941L116.538,119.415L117.274,119.239L117.642,119.239L118.144,119.239L118.981,119.941L119.416,120.117L120.353,120.644L121.759,120.468L122.027,120.468L122.462,120.644L122.696,120.644L123.499,120.82L124.068,120.82L125.072,120.644L125.675,120.117L126.077,119.766L126.779,119.766L127.315,119.766L127.482,119.766L127.951,119.766L128.62,119.941L129.256,119.59L130.059,119.063L130.896,118.537L131.632,118.888L132.335,119.063L132.77,119.239L133.44,119.239L134.009,119.239L134.778,119.415L135.515,119.415L135.95,119.415L136.586,119.59L137.523,120.117L138.092,120.293L139.163,120.293L139.866,119.941L141.539,119.59L142.208,119.415L142.71,119.415L143.447,119.415L144.317,119.59L145.154,119.766L145.321,119.766L146.258,119.766L147.396,119.59L148.065,119.59L149.304,119.766L149.739,119.941L150.274,119.941L150.643,120.117L151.546,120.117L151.914,120.117L152.851,120.468L154.19,120.468L154.826,120.468L155.194,120.468L155.897,120.644L157.939,120.995L158.206,121.171L158.474,121.171L159.144,121.522L159.846,121.873L160.315,122.049L160.85,122.049L161.051,122.049L161.319,122.049L161.62,122.049L163.059,121.873L163.863,121.698L164.699,121.171L165.603,121.171L167.276,121.346L168.849,121.171L169.352,121.171L169.552,121.171L171.025,120.468L171.862,119.766L172.799,119.415L173.903,118.712L174.573,118.537L174.773,118.537L175.409,118.361L176.213,118.01L176.681,117.659L177.417,117.132L178.422,116.429L178.99,115.902L179.559,115.551L180.195,115.376L181.066,115.024L181.735,114.849L182.371,114.673L183.007,114.498L183.408,114.322L184.044,113.971L184.546,111.161L185.082,111.161L185.852,111.161L186.387,111.161L186.655,111.337L186.755,111.161L186.856,111.161L187.123,111.337L187.257,111.337L187.558,111.512L187.726,111.512L187.86,111.688L188.094,111.688L188.295,111.688L188.529,111.688L189.065,111.688L189.366,111.688L189.667,111.688L190.069,111.688L190.169,111.688L190.537,111.688L191.14,111.512L191.508,111.161L191.809,111.161L192.01,110.81L192.211,110.634L192.512,110.283L193.683,109.405L194.486,108.351L194.989,108L195.189,107.649L195.357,107.473L195.758,107.473L195.859,107.298L196.193,107.298L196.428,107.298L196.562,107.298L196.963,107.122L197.331,107.122L198.469,106.595L199.139,106.068L199.373,106.068L199.607,105.893L200.109,105.893L200.444,105.717L201.314,105.015L202.184,104.488L202.552,104.312L202.921,103.961L203.322,103.61L203.858,102.907L205.933,102.38L207.104,102.205L207.707,102.38L208.845,102.205L209.213,101.502L209.782,100.8L210.016,100.449L210.652,99.746L211.12,99.395L212.158,98.693L212.392,98.166L212.693,97.99L212.928,97.815L213.095,97.463L213.564,97.112L213.865,96.761L214.166,96.41L215.438,94.654L215.538,94.478L215.84,94.302L216.408,93.073L216.542,92.898L217.145,92.546L218.986,92.898L219.287,93.073L219.454,93.073L221.194,93.424L221.897,93.249L222.366,93.424L222.834,93.951L223.437,94.654L224.106,95.356L225.345,95.707L225.512,95.532L225.88,95.707L226.181,95.532L226.315,95.532L226.449,95.532L226.951,95.532L227.62,96.234L228.022,96.234L228.558,96.234L229.26,96.41L229.495,96.41L229.729,96.41L230.532,96.234L230.767,96.234L231.135,96.41L231.369,96.234L231.67,96.234L232.239,95.532L232.507,95.005L233.143,94.302L233.779,93.6L234.046,93.249L234.147,93.073L234.515,92.722L234.716,92.371L235.285,91.493L235.753,90.966L237.092,88.859L237.628,88.156L238.063,87.805L238.364,87.278L238.766,86.576L239.033,86.224L239.268,86.049L239.401,86.049L239.903,85.346L240.037,84.995L240.272,84.644L240.406,84.468L240.573,84.293L240.707,84.117L241.041,83.766L241.443,82.888L241.577,82.712L242.079,82.185L242.38,81.834L242.949,81.132L243.217,80.78L244.489,80.78L245.56,80.605L246.698,79.2L249.141,78.498L250.011,77.62L251.015,76.039L251.751,74.81L252.053,74.634L252.354,74.107L252.622,73.756L252.956,72.878L253.458,72.351L253.86,72L254.295,71.824L254.998,72L255.835,72.351L256.571,72.527L257.006,72.702L257.91,72.702L258.847,73.229L259.416,73.756L261.022,73.58L261.39,73.58L261.792,73.229L262.83,72.878L263.064,73.054L264.235,73.405L265.005,73.405L265.607,73.405L266.31,73.054L266.578,73.054L267.013,72.878L267.85,72.878L268.385,73.054L269.222,73.58L269.657,73.932L270.025,74.283L270.327,74.107L270.862,74.107L271.13,74.283L271.264,74.283L271.632,74.107L271.799,74.107L271.966,74.283L272.368,74.81L272.569,74.81L273.238,74.985L274.242,74.459L275.246,73.932L275.414,73.756L276.853,73.58L277.154,73.405L277.388,73.229L277.924,73.054L278.392,73.054L279.062,72.702L279.33,72.527L279.731,72.351L281.405,71.649L282.174,70.42L283.346,69.717L284.116,69.366L284.651,68.663L285.086,68.312L285.187,68.137L285.588,67.434L286.525,65.854L287.529,65.151L287.663,65.151L288.031,65.151L288.902,65.327L289.638,64.976L291.077,64.273L291.311,64.273L291.646,64.098L291.947,64.098L292.248,63.922L292.617,63.746L292.985,62.868L293.554,61.99L294.089,61.463L294.257,61.112L295.093,60.761L295.528,60.41L295.997,59.883L296.532,59.356L296.867,58.654L297.269,58.127L297.403,58.127L297.67,58.127L297.871,58.127L298.641,59.532L299.043,59.707L299.377,60.234L299.645,60.41L300.716,60.937L300.883,61.112L301.218,60.937L301.754,61.639L301.954,61.815L302.289,62.166L302.624,62.166L303.092,62.517L304.13,64.098L304.297,64.449L304.565,64.976L304.933,65.502L305.335,66.205L305.703,66.38L306.138,66.732L306.64,67.259L307.042,67.785L307.443,68.663L308.012,69.366L308.247,69.541L308.481,69.366L310.154,70.068L311.125,70.595L312.33,70.771L312.798,70.771L313.066,71.122L313.267,71.122L313.602,71.298L314.003,71.824L314.739,71.824L315.677,71.122L316.112,70.946L316.279,70.946L317.651,70.244L318.689,71.122L319.392,70.771L319.693,70.595L320.228,70.068L320.463,69.717L320.831,69.541L321.132,69.015L321.433,68.663L321.935,68.312L322.236,68.137L322.805,67.434L323.174,66.732L323.776,66.907L324.546,67.083L324.88,67.083L325.55,66.556L326.119,66.38L326.855,66.907L327.324,66.556L327.625,66.38L327.859,66.205L328.595,66.205L329.098,66.732L329.7,67.083L329.968,66.907L330.169,66.907L331.541,67.434L332.043,67.083L332.913,66.556L333.114,66.205L333.984,66.38L334.519,66.205L335.256,66.556L335.457,66.907L335.925,67.259L336.36,67.259L336.929,67.434L337.163,67.61L337.9,67.785L338.603,67.961L338.837,68.137L339.004,68.137L354.099,80.078L355.872,81.307L356.073,81.307L356.542,79.727L357.546,79.376L359.587,77.795L361.796,76.215L362.901,74.985L363.47,92.722L363.604,92.722L364.139,74.459L364.307,74.634L364.541,74.283L364.641,74.634L364.842,74.459L365.444,74.459L366.315,73.932L367.352,72.878L368.089,72.527L369.16,71.649L369.929,71.298L370.431,70.771L370.833,70.771L371.235,70.771L374.113,70.595L375.251,69.366L375.519,69.19L376.288,68.312L376.824,67.61L377.426,66.907L377.694,66.732L378.196,65.854L379.669,64.098L379.97,63.22L380.238,62.868L380.606,62.341L381.242,61.288L381.576,61.112L382.011,60.41L382.246,60.234L382.58,59.532L383.116,59.005L383.685,58.127L384.421,57.249L384.689,56.898L385.091,56.195L385.559,56.195L385.894,56.722L386.53,56.02L387.333,55.317L388.304,54.263L388.705,53.912L388.873,53.912L389.375,53.385L389.642,53.21L390.144,52.683L390.579,51.98L390.981,51.629L391.416,50.927L391.751,50.4L392.152,49.698L392.454,49.171L392.688,48.644L392.889,48.468L393.257,48.117L393.592,47.415L393.759,47.239L394.194,47.063L394.562,46.537L394.763,46.361L395.332,45.834L396.771,44.78L397.24,44.605L397.876,43.727L398.143,43.551L398.512,43.024L399.014,42.498L399.315,41.971L399.817,41.444L400.252,41.268L400.587,40.917L400.754,40.741L401.055,40.39L401.256,40.039L401.959,38.985L402.16,38.81L402.662,38.283L402.829,38.107L403.264,37.405L403.967,36.351L405.44,33.541L405.54,33.366L407.213,32.312L407.648,31.785L407.749,31.61L408.552,31.434L408.853,31.259L409.054,30.38L409.222,30.029L409.556,29.502L409.991,28.976L410.192,28.976L410.728,28.449L410.895,28.273L411.096,28.098L411.966,28.449L412.635,28.449L413.204,27.746L413.539,27.22L413.706,27.044L414.108,26.517L414.543,25.288L415.313,24.059L415.514,23.532L415.714,23.005L415.848,22.829L416.25,22.654L416.719,22.654L416.953,22.829L417.689,23.005L420.4,22.478L420.969,22.654L421.237,22.478L421.739,22.478L422.576,22.302L424.149,22.302L424.851,22.478L426.224,22.654L427.83,22.654L428.868,22.127L429.035,21.951L429.269,21.776L430.173,21.951L431.612,21.951L431.746,21.951L433.085,21.6L434.39,21.424L434.658,21.951L435.059,22.478L435.595,22.829L435.796,23.18L437.235,23.532L438.406,24.059L439.544,24.585L440.414,24.937L441.117,24.761L442.054,24.41L443.36,23.532L443.795,22.829L444.163,22.127L444.431,21.776L445.368,20.722L447.075,19.317L448.279,18.79L448.581,18.615L449.116,18.615L450.555,18.439L451.258,18.088L452.095,17.561L452.53,17.21L452.831,16.859L453.032,16.507L453.333,15.98L454.404,14.049L454.839,13.522L455.107,12.995L455.509,12.468L455.71,11.766L455.877,11.59L456.278,11.063L456.613,10.888L456.881,10.537L457.082,9.834L457.751,8.605L457.952,8.254L458.186,8.254L458.822,8.078L459.19,7.551L459.525,7.024L459.927,6.673L460.395,6.146L460.73,5.795L461.165,4.917L461.366,4.566L461.5,4.39L462.47,2.81L462.838,2.107L463.24,2.283L463.775,1.932L464.277,1.756L464.78,1.932L464.846,1.756L465.014,1.58L465.65,1.405L465.917,0L466.051,0L466.219,0L466.319,0L467.792,1.405L468.729,1.932L469.632,2.985L469.733,3.337L470.101,4.039L470.503,5.093L471.005,5.971L471.373,6.849L471.507,7.024L471.674,7.2L472.578,9.307L472.812,9.659L473.348,10.361L474.552,11.59L475.356,11.766L475.757,11.766L476.025,11.941L476.36,11.941L477.431,12.468L477.765,13.171L478.535,14.576L479.773,16.507L480.276,17.385L481.748,19.493L482.351,20.195L482.518,20.546L484.258,21.776L484.727,22.127L485.229,22.478L486.032,22.654L486.568,23.005L486.735,23.356L487.036,23.883L487.672,24.234L487.773,24.41L488.375,25.288L488.509,25.463L489.044,26.166L489.312,26.693L489.881,27.044L490.383,27.395L490.55,27.571L490.684,27.571L490.919,27.746L491.889,28.098L492.09,28.449L492.291,28.624L492.692,28.8L493.362,30.556L493.696,31.259L493.797,31.434L494.399,32.663L494.901,33.366L495.136,33.893L495.336,34.244L495.638,35.122L495.838,35.473L496.006,36L496.809,37.054L497.144,37.405L498.65,37.932L499.42,38.459L500.39,38.985L501.394,39.863L502.7,40.39L503.904,40.566L504.373,40.741L506.214,41.268L508.055,42.146L511.1,43.2L513.51,43.902L513.845,43.902L514.347,44.078L514.782,44.078L516.455,44.078L519.066,44.254L520.706,44.605L521.509,45.132L521.844,45.307L522.848,45.483L526.061,46.537L526.697,46.712L528.571,46.888L533.056,47.766L534.763,47.766L536.034,47.766L536.503,48.117L537.072,48.995L540.854,50.927L542.193,51.278L542.293,51.454L542.46,51.454L543.766,50.927L544.77,50.927L546.644,51.278L548.685,51.629L552.267,51.98L554.174,51.629L554.777,51.454L555.948,50.927L558.191,49.346L561.437,48.117L563.445,47.766L564.918,47.59L566.993,47.239L568.8,46.888L569.068,46.888L570.44,46.537L570.708,46.361L572.181,45.659L572.816,45.132L573.318,44.956L574.624,44.78L575.327,44.254L577,43.024"></path><g><circle style="fill: rgba(68, 146, 220, 0.42); opacity: 0;" stroke="none" r="8.5" cx="119.41624129930392" cy="120.1170731707317"></circle></g><g><text style="opacity: 0;" text-anchor="left" alignment-baseline="middle" x="134.41624129930392" y="120.1170731707317">3.57 km</text></g><g><text style="opacity: 0;" text-anchor="left" alignment-baseline="middle" x="134.41624129930392" y="135.11707317073171">1130 m</text></g><rect style="fill: none; pointer-events: all;" width="577" height="180"></rect></g></svg></div>
+                <div class="flex-grow-1 p-0 m-0" id="graph" style="width:100%"></div>
                 <div class="d-flex flex-row justify-content-end p-0 pb-1 me-2 m-0">
                     <div class="dropdown">
                         <button class="btn btn-secondary btn-sm dropdown-toggle" type="button" id="dropdowngraphyaxis" data-bs-toggle="dropdown" aria-expanded="false">Elevation</button>
                         <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="#" onclick="changeGraphY(GraphAxis.Distance)">Distance</a></li>
-                            <li><a class="dropdown-item" href="#" onclick="changeGraphY(GraphAxis.Elevation)">Elevation</a></li>
-                            <li><a class="dropdown-item" href="#" onclick="changeGraphY(GraphAxis.HorizontalSpeed)">Horizontal
-                                Speed</a></li>
-                            <li><a class="dropdown-item" href="#" onclick="changeGraphY(GraphAxis.VerticalSpeed)">Vertical
-                                Speed</a></li>
+                            <li><a class="dropdown-item" href="#" id="graphYDistance">Distance</a></li>
+                            <li><a class="dropdown-item" href="#" id="graphYElevation" >Elevation</a></li>
+                            <li><a class="dropdown-item" href="#" id="graphYHorizontalspeed" >Horizontal Speed</a></li>
+                            <li><a class="dropdown-item" href="#" id="graphYVerticalspeed" >Vertical Speed</a></li>
                         </ul>
                     </div>
                     <div class="p-1">versus</div>
                     <div class="dropdown">
                         <button class="btn btn-secondary btn-sm dropdown-toggle" type="button" id="dropdowngraphxaxis" data-bs-toggle="dropdown" aria-expanded="false">Distance</button>
                         <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="#" onclick="changeGraphX(GraphAxis.ElapsedTime)">Elapsed
-                                Time</a></li>
-                            <li><a class="dropdown-item" href="#" onclick="changeGraphX(GraphAxis.MovingTime)">Moving
-                                Time</a></li>
-                            <li><a class="dropdown-item" href="#" onclick="changeGraphX(GraphAxis.Distance)">Distance</a></li>
+                            <li><a class="dropdown-item" href="#" id="graphXElapsedtime">Elapsed Time</a></li>
+                            <li><a class="dropdown-item" href="#" id="graphXMovingtime">Moving Time</a></li>
+                            <li><a class="dropdown-item" href="#" id="graphXDistance">Distance</a></li>
                         </ul>
                     </div>
                 </div>
             </div>
             <div class="w-100" style="height: 25vh; min-height: 250px">
-                <div id="map2d" style="height: 100%; width: 100%; min-width: 100px;" class="maplibregl-map"><div class="maplibregl-canvas-container maplibregl-interactive maplibregl-touch-drag-pan maplibregl-touch-zoom-rotate"><canvas class="maplibregl-canvas" tabindex="0" aria-label="Map" role="region" width="1244" height="500" style="width: 622px; height: 250px;"></canvas><div class="marker2d maplibregl-marker maplibregl-marker-anchor-center" style="transform: translate(-50%, -50%) translate(-18193px, 106542px) rotateX(0deg) rotateZ(0deg);"></div></div><div class="maplibregl-control-container"><div class="maplibregl-ctrl-top-left "></div><div class="maplibregl-ctrl-top-right "></div><div class="maplibregl-ctrl-bottom-left "></div><div class="maplibregl-ctrl-bottom-right "></div></div></div>
+                <div id="map2d" style="height: 100%; width: 100%; min-width: 100px;"></div>
             </div>
         </div>
     </div>
@@ -113,8 +109,6 @@
                         </div>
                         <div class="fw-light">Athlete: folli</div>
                         <div>
-                            
-
                         </div>
                     </div>
 
@@ -198,12 +192,10 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-
                 <div class="form-check form-switch">
-                    <input class="form-check-input" type="checkbox" id="metricChecked" onclick="clickSettingsMetric()" checked="checked">
+                    <input class="form-check-input" type="checkbox" id="metricChecked" checked="checked">
                     <label class="form-check-label" for="metricChecked" id="metricCheckedLabel">Metric Units</label>
                 </div>
-
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
@@ -211,14 +203,6 @@
         </div>
     </div>
 </div>
-
-
-
-
-
-
-
-
 
 <div class="modal" id="sharemodal" tabindex="-1">
     <div class="modal-dialog">
@@ -258,18 +242,21 @@
 
 
 <script>
-    var trackid = 5876;
-    var distance = 15129;
-    var elevationUp = 73;
-    var elevationDown = 72;
-    var highestElevationPoint = 186;
-    var lowestElevationPoint = 179;
-    var favorite = false;
-    var hidden = false;
-    var sharing = "PUBLIC";
+const sharedObjects = {
+    metric : true,
+    trackid : 5876,
+    distance : 15129,
+    elevationUp : 73,
+    elevationDown : 72,
+    highestElevationPoint : 186,
+    lowestElevationPoint : 179,
+    favorite : false,
+    hidden : false,
+    sharing : "PUBLIC",
+    root : "../api/",
+    minAltitude: 0,
+    maxAltitude: 5000,
+}
 </script>
-<script src="../js/kd-tree.js"></script>
-<script src="../js/trackview_v2.js"></script>
-
-
+<script type="module" src="./js/main.js"></script>
 </body></html>

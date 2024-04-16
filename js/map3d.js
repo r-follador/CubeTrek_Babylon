@@ -35,6 +35,9 @@ export class Map3D {
                 }
             });
         })
+
+        document.getElementById("btnradio1").addEventListener('click', () =>  {this.changeMapstyle('standard')});
+        document.getElementById("btnradio3").addEventListener('click', () =>  {this.changeMapstyle('satellite')});
     }
 
     async delayCreateScene() {
@@ -299,9 +302,7 @@ export class Map3D {
     }
 
     findClosestTrackpoint(lat, lon) {
-        console.log("find line")
         if (lat == null) {
-            console.log("lat is null");
             eventBus.emit('hideMarkers', {});
             return;
         }
@@ -327,5 +328,30 @@ export class Map3D {
             return true;
         }
         return false;
+    }
+
+    changeMapstyle(style) {
+        let styletype;
+        switch(style) {
+            case 'standard':
+                styletype = 'standard';
+                this.helperLight.intensity=0.6;
+                break;
+            case 'satellite':
+                styletype = 'satellite';
+                this.helperLight.intensity=0.8;
+                break;
+            default:
+                this.styletype = 'standard';
+                this.helperLight.intensity=0.6;
+        }
+
+        //exchange texture for each mesh
+        for (let i =0; i < this.meshes.length; i++ ) {
+            this.meshes[i].material.albedoTexture.dispose();
+            let url = sharedObjects.root + `gltf/map/${styletype}/${this.geojson.properties.tileBBoxes[i].tile_zoom}/${this.geojson.properties.tileBBoxes[i].tile_x}/${this.geojson.properties.tileBBoxes[i].tile_y}.png`;
+            this.meshes[i].material.albedoTexture = new BABYLON.Texture(url, this.scene);
+            this.meshes[i].material.albedoTexture.vScale = -1;
+        }
     }
 }

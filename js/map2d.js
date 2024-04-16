@@ -48,9 +48,7 @@ export class Map2D {
     }
 
     findClosestTrackpoint(lat, lon) {
-        console.log("find line")
         if (lat == null) {
-            console.log("lat is null");
             eventBus.emit('hideMarkers', {});
             return;
         }

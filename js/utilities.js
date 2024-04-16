@@ -3,8 +3,10 @@ const feet_per_m = 3.28084;
 
 document.addEventListener('DOMContentLoaded', () => {
     document.getElementById("metricChecked").addEventListener('click', clickSettingsMetric);
-    document.getElementById("copylinktoclipboard").addEventListener('click', copylinktoclipboard);
-    document.getElementById("setTrackShare").addEventListener('click', setTrackShare);
+    if (document.getElementById("copylinktoclipboard"))
+        document.getElementById("copylinktoclipboard").addEventListener('click', copylinktoclipboard);
+    if (document.getElementById("setTrackShare"))
+        document.getElementById("setTrackShare").addEventListener('click', setTrackShare);
     if (document.getElementById("inputTitle")) {
         document.getElementById("inputTitle").addEventListener("keypress", function (event) {
             if (event.key === "Enter") {

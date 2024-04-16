@@ -76,7 +76,6 @@ export class GraphCube {
     }
 
     changeGraphX(type) {
-        console.log("change to "+type);
         this.graphXAxis = type;
         this.drawGraph();
     }
