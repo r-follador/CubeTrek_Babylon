@@ -7,7 +7,7 @@ export class Map3D {
 
     constructor(geojson) {
         this.geojson = geojson;
-        this.canvas = document.getElementById("renderCanvas"); // Get the canvas element
+        this.canvas = document.getElementById("map3dCanvas"); // Get the canvas element
         this.canvas.addEventListener("wheel", evt => evt.preventDefault());
         this.engine = new BABYLON.Engine(this.canvas, true);
         this.engine.setHardwareScalingLevel(0.7);
@@ -76,9 +76,8 @@ export class Map3D {
         //when camera is changed (rotation/zoom/pan...)
         camera.onViewMatrixChangedObservable.add(function(c) {
             //Clamp camera.target.z within a certain boundary
-            //sharedObjects.minAltitude / maxAltitude is defined in graph.js
             //TODO: this could use some smarter way to prevent the camera from going too far off
-            c.target.z = Math.min(Math.max(c.target.z, (sharedObjects.minAltitude - 200) * zscaling), (sharedObjects.maxAltitude + 200) * zscaling);
+            c.target.z = Math.min(Math.max(c.target.z, (sharedObjects.lowestElevationPoint - 200) * zscaling), (sharedObjects.highestElevationPoint + 200) * zscaling);
             //change light as to give the impression that the mesh rotates (instead of the camera)
             dirLight.direction = new BABYLON.Vector3(-1 * c.position.y, c.position.x, 0);
         });

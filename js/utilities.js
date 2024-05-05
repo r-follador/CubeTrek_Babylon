@@ -1,23 +1,7 @@
 const miles_per_km = 0.621371;
 const feet_per_m = 3.28084;
 
-document.addEventListener('DOMContentLoaded', () => {
-    document.getElementById("metricChecked").addEventListener('click', clickSettingsMetric);
-    if (document.getElementById("copylinktoclipboard"))
-        document.getElementById("copylinktoclipboard").addEventListener('click', copylinktoclipboard);
-    if (document.getElementById("setTrackShare"))
-        document.getElementById("setTrackShare").addEventListener('click', setTrackShare);
-    if (document.getElementById("inputTitle")) {
-        document.getElementById("inputTitle").addEventListener("keypress", function (event) {
-            if (event.key === "Enter") {
-                event.preventDefault();
-                event.stopPropagation()
-                event.stopImmediatePropagation();
-                saveEdit();
-            }
-        });
-    }
-});
+
 
 export function settings() {
     if (localStorage.getItem("metric") === null) {
@@ -26,13 +10,55 @@ export function settings() {
         sharedObjects.metric = (localStorage.getItem("metric")==="true");
     }
 
-    if (sharedObjects.metric) {
-        document.getElementById("metricChecked").checked = true;
-        setMetric();
-    } else {
-        document.getElementById("metricChecked").checked = false;
-        setMetric();
-    }
+    document.addEventListener('DOMContentLoaded', () => {
+        document.getElementById("metricChecked").addEventListener('click', clickSettingsMetric);
+        if (sharedObjects.metric) {
+            document.getElementById("metricChecked").checked = true;
+            setMetric();
+        } else {
+            document.getElementById("metricChecked").checked = false;
+            setMetric();
+        }
+
+
+        if (document.getElementById("favoritestar"))
+            document.getElementById("favoritestar").addEventListener('click', clickfavorite);
+        if (document.getElementById("sharebutton"))
+            document.getElementById("sharebutton").addEventListener('click', clickshare);
+        if (document.getElementById("favoriteChecked"))
+            document.getElementById("favoriteChecked").addEventListener('click', clickfavorite);
+        if (document.getElementById("publicChecked"))
+            document.getElementById("publicChecked").addEventListener('click', () => {setTrackShare(undefined)});
+        if (document.getElementById("hiddenChecked"))
+            document.getElementById("hiddenChecked").addEventListener('click', () => {clickhide(false)});
+        if (document.getElementById("deleteTrack"))
+            document.getElementById("deleteTrack").addEventListener('click', () => {clickdelete(false)});
+        if (document.getElementById("saveEditButton"))
+            document.getElementById("saveEditButton").addEventListener('click', saveEdit);
+        if (document.getElementById("saveEditButton2"))
+            document.getElementById("saveEditButton2").addEventListener('click', saveEdit);
+        if (document.getElementById("hideTrackButton"))
+            document.getElementById("hideTrackButton").addEventListener('click', () => {clickhide(true)});
+        if (document.getElementById("deleteTrackButton"))
+            document.getElementById("deleteTrackButton").addEventListener('click', () => {clickdelete(true)});
+        if (document.getElementById("trackShareButton"))
+            document.getElementById("trackShareButton").addEventListener('click', () => {setTrackShare('PUBLIC')});
+
+
+        if (document.getElementById("copylinktoclipboard"))
+            document.getElementById("copylinktoclipboard").addEventListener('click', copylinktoclipboard);
+        if (document.getElementById("inputTitle")) {
+            document.getElementById("inputTitle").addEventListener("keypress", function (event) {
+                if (event.key === "Enter") {
+                    event.preventDefault();
+                    event.stopPropagation()
+                    event.stopImmediatePropagation();
+                    saveEdit();
+                }
+            });
+        }
+    });
+
 }
 
 
@@ -63,7 +89,7 @@ function saveEdit() {
 
     let data = {index: sharedObjects.trackid, title: editTitle, activitytype: editType, note: editComment};
 
-    fetch(root+"modify", {
+    fetch(sharedObjects.root+"modify", {
         method: "POST",
         headers: {'Content-Type': 'application/json'},
         body: JSON.stringify(data)
@@ -85,19 +111,19 @@ function saveEdit() {
 }
 
 function clickfavorite() {
-    fetch(root+"modify/id="+trackid+"&favorite="+(!favorite), {
+    fetch(sharedObjects.root+"modify/id="+sharedObjects.trackid+"&favorite="+(!sharedObjects.favorite), {
         method: "GET"
     }).then(res => {
         res.json().then(response => {
             if (res.ok) {
-                favorite = !favorite;
-                if (favorite)
+                sharedObjects.favorite = !sharedObjects.favorite;
+                if (sharedObjects.favorite)
                     document.getElementById("favoritestar").src="../assets/icon_favorite_select.svg";
                 else
                     document.getElementById("favoritestar").src="../assets/icon_favorite_unselect.svg";
 
-                document.getElementById("favoriteChecked").checked = favorite;
-                if (hidden)
+                document.getElementById("favoriteChecked").checked = sharedObjects.favorite;
+                if (sharedObjects.hidden)
                     location.reload();
             } else {
                 //not good
@@ -110,13 +136,13 @@ function clickfavorite() {
 }
 
 function clickhide(confirmed) {
-    if (!hidden && !confirmed) {
+    if (!sharedObjects.hidden && !confirmed) {
         bootstrap.Modal.getOrCreateInstance(document.getElementById('confirmhidden')).show();
         bootstrap.Modal.getOrCreateInstance(document.getElementById('settingsModal')).hide();
         document.getElementById("hiddenChecked").checked = false;
         return;
     }
-    fetch(root+"modify/id="+trackid+"&hidden="+(!hidden), {
+    fetch(sharedObjects.root+"modify/id="+sharedObjects.trackid+"&hidden="+(!sharedObjects.hidden), {
         method: "GET"
     }).then(res => {
         res.json().then(response => {
@@ -138,7 +164,7 @@ function clickdelete(confirmed) {
         bootstrap.Modal.getOrCreateInstance(document.getElementById('settingsModal')).hide();
         return;
     }
-    fetch(root + "modify/id=" + trackid, {
+    fetch(sharedObjects.root + "modify/id=" + sharedObjects.trackid, {
         method: "DELETE"
     }).then(res => {
         res.json().then(response => {
@@ -169,18 +195,18 @@ function copylinktoclipboard() {
 
 function setTrackShare(state) {
     if (typeof state === 'undefined') {
-        if (sharing === "PUBLIC")
+        if (sharedObjects.sharing === "PUBLIC")
             setTrackShare("PRIVATE");
         else
             setTrackShare("PUBLIC");
         return;
     }
-    fetch(root+"modify/id="+trackid+"&sharing="+state, {
+    fetch(sharedObjects.root+"modify/id="+sharedObjects.trackid+"&sharing="+state, {
         method: "GET"
     }).then(res => {
         res.json().then(response => {
             if (res.ok) {
-                sharing = state;
+                sharedObjects.sharing = state;
                 if (state === "PUBLIC") {
                     document.getElementById("publicSet").style.display = "block";
                     document.getElementById("privateSet").style.display = "none";
